@@ -14,7 +14,7 @@
 | `GET` | `/projects` | List all projects. | `getProjects()` |
 | `POST` | `/projects` | Create a project. Body must match `Project` shape. | `createProject(data)` |
 | `GET` | `/projects/{id}` | Retrieve a project by ID. | `getProject(id)` |
-| `PUT` | `/projects/{id}` | Replace fields on an existing project. | `updateProject(id, data)` |
+| `PATCH` | `/projects/{id}` | Update fields on an existing project. | `updateProject(id, data)` |
 | `DELETE` | `/projects/{id}` | Remove a project. | `deleteProject(id)` |
 
 ### Example
@@ -47,6 +47,8 @@ GET http://localhost:3000/api/projects/1
 ### Example
 
 **Request**
+```
+PATCH http://localhost:3000/api/claims/2
 ```
 PATCH http://localhost:3000/api/claims/2
 Content-Type: application/json

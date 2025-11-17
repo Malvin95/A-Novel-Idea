@@ -1,5 +1,5 @@
 import { Claim } from "@/shared/interfaces";
-import { mockClaims } from "./stubData";
+import { mockClaims } from "../stubData";
 
 export async function getClaims() {
     return mockClaims;

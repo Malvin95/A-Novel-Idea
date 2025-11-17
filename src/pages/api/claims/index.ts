@@ -1,4 +1,4 @@
-import { createClaim, getClaims } from "@/pages/services/claims.service";
+import { createClaim, getClaims } from "@/pages/services/claims/claims.service";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

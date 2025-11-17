@@ -1,4 +1,4 @@
-import { deleteClaim, getClaim, updateClaim } from "@/pages/services/claims.service";
+import { getClaim, updateClaim, deleteClaim } from "@/pages/services/claims/claims.service";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

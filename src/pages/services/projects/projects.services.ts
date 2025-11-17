@@ -1,5 +1,5 @@
 import { Project } from "@/shared/interfaces";
-import { mockProjects } from "./stubData";
+import { mockProjects } from "../stubData";
 
 export async function getProjects() {
     return mockProjects;
@@ -10,7 +10,6 @@ export async function getProject(id: string) {
 }
 
 export async function createProject(data: Project) {
-    console.log("The passed in data is: ", data);
     const newProject = { id: Date.now().toString(), ...data };
     mockProjects.push(newProject);
     return newProject;
