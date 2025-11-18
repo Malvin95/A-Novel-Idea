@@ -11,6 +11,9 @@ const config: Config = {
       }
     ]
   },
+  transformIgnorePatterns: [
+    "node_modules/(?!(uuid)/)"
+  ],
   testPathIgnorePatterns: ["/lib/", "/node_modules/"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1"

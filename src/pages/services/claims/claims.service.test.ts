@@ -1,21 +1,86 @@
-
-import { mockClaims } from "@/pages/services/stubData";
 import { status } from "@/shared/enums";
 import { createClaim, deleteClaim, getClaim, getClaims, updateClaim } from "./claims.service";
 import { Claim } from "@/shared/interfaces";
+import { ddbDocClient } from "@/pages/api/lib/dynamo";
+
+jest.mock("@/pages/api/lib/dynamo", () => ({
+  ddbDocClient: {
+    send: jest.fn(),
+  },
+}));
+
+jest.mock("uuid", () => ({
+  v7: jest.fn(() => "mock-uuid-v7"),
+}));
+
+const mockSend = ddbDocClient.send as jest.MockedFunction<typeof ddbDocClient.send>;
 
 describe("claims.service", () => {
-  it("returns all claims", async () => {
-    const claims = await getClaims();
-
-    expect(claims).toBe(mockClaims);
-    expect(claims.length).toBeGreaterThan(0);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("returns a claim by id", async () => {
-    const claim = await getClaim("1");
+  it("returns all claims", async () => {
+    const mockItems = [
+      {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        companyName: { S: "Test Company" },
+        claimPeriod: { S: "2024-01" },
+        amount: { N: "1000" },
+        associatedProject: { S: "Project Alpha" },
+        status: { S: status.DRAFT },
+      },
+    ];
 
-    expect(claim).toMatchObject({ id: "1" });
+    mockSend.mockResolvedValueOnce({
+      Items: mockItems,
+      Count: 1,
+      ScannedCount: 1,
+    } as any);
+
+    const result = await getClaims();
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-claims-table-v2",
+        }),
+      })
+    );
+    expect(result).toHaveProperty("Items");
+    expect(result).toHaveProperty("Count");
+  });
+
+  it("returns a claim by id and dateCreated", async () => {
+    const mockItem = {
+      Item: {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        companyName: { S: "Test Company" },
+        claimPeriod: { S: "2024-01" },
+        amount: { N: "1000" },
+        associatedProject: { S: "Project Alpha" },
+        status: { S: status.DRAFT },
+      },
+    };
+
+    mockSend.mockResolvedValueOnce(mockItem as any);
+
+    const result = await getClaim("1", "2024-01-01T00:00:00.000Z");
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-claims-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+        }),
+      })
+    );
+    expect(result).toHaveProperty("Item");
   });
 
   it("creates a claim", async () => {
@@ -24,29 +89,74 @@ describe("claims.service", () => {
       claimPeriod: "2024-11",
       amount: 5000,
       associatedProject: "Project Beta",
-      status: status.DRAFT
+      status: status.DRAFT,
     };
 
-    const created = await createClaim(payload);
+    mockSend.mockResolvedValueOnce({} as any);
 
-    expect(created).toMatchObject(payload);
-    expect(created).toHaveProperty("id");
-    expect(mockClaims).toContainEqual(created);
+    const result = await createClaim(payload);
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-claims-table-v2",
+          Item: expect.objectContaining({
+            companyName: { S: "Claim Co" },
+            claimPeriod: { S: "2024-11" },
+            amount: { N: "5000" },
+            associatedProject: { S: "Project Beta" },
+            status: { S: status.DRAFT },
+          }),
+        }),
+      })
+    );
+    expect(result).toBeDefined();
   });
 
   it("updates a claim", async () => {
     const testClaim = { status: status.APPROVED } as Partial<Claim>;
 
-    const updated = await updateClaim("1", testClaim as Claim);
+    mockSend.mockResolvedValueOnce({
+      Attributes: {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        status: { S: status.APPROVED },
+      },
+    } as unknown);
 
-    expect(updated).toMatchObject({ id: "1", status: status.APPROVED });
-    expect(mockClaims.find((c) => c.id === "1")).toEqual(updated);
+    const result = await updateClaim("1", "2024-01-01T00:00:00.000Z", testClaim);
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-claims-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+          UpdateExpression: expect.stringContaining("#status = :status"),
+        }),
+      })
+    );
+    expect(result).toBeDefined();
   });
 
   it("deletes a claim", async () => {
-    await deleteClaim("1");
+    mockSend.mockResolvedValueOnce({} as any);
 
-    expect(mockClaims.find((c) => c.id === "1")).toBeUndefined();
+    await deleteClaim("1", "2024-01-01T00:00:00.000Z");
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-claims-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+        }),
+      })
+    );
   });
 });
 

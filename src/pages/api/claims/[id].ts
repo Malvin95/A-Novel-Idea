@@ -2,24 +2,32 @@ import { getClaim, updateClaim, deleteClaim } from "@/pages/services/claims/clai
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-	const { id } = req.query;
-	const { companyName } = req.body || req.query;
+	const { id, dateCreated } = req.query;
 
 	try {
 		if (req.method === "GET") {
-			const claim = await getClaim(id as string, companyName as string);
+			if (!dateCreated) {
+				return res.status(400).json({ error: "dateCreated query parameter is required" });
+			}
+			const claim = await getClaim(id as string, dateCreated as string);
 			return claim
 			? res.status(200).json(claim)
 			: res.status(404).json({ error: "Not found" });
 		}
 
 		if (req.method === "PATCH") {
-			const updated = await updateClaim(id as string, companyName, req.body);
+			if (!dateCreated) {
+				return res.status(400).json({ error: "dateCreated query parameter is required" });
+			}
+			const updated = await updateClaim(id as string, dateCreated as string, req.body);
 			return res.status(200).json(updated);
 		}
 
 		if (req.method === "DELETE") {
-			await deleteClaim(id as string, companyName as string);
+			if (!dateCreated) {
+				return res.status(400).json({ error: "dateCreated query parameter is required" });
+			}
+			await deleteClaim(id as string, dateCreated as string);
 			return res.status(204).end();
 		}
 

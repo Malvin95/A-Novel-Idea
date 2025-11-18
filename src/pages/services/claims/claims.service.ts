@@ -1,11 +1,12 @@
 import { Claim } from "@/shared/interfaces";
 import { ddbDocClient } from "@/pages/api/lib/dynamo";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { v7 as uuidv7} from "uuid";
 import { DeleteItemCommand, GetItemCommand, PutItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
-const TABLE_NAME = "a-novel-claim-table";
+const TABLE_NAME = "a-novel-claims-table-v2";
 
-type EAVtype= {
+export type EAVtype= {
     ':claimPeriod'?: { S: string },
     ':amount'?: { N: string },
     ':associatedProject'?: { S: string },
@@ -21,13 +22,13 @@ export async function getClaims() {
     return res;
 }
 
-export async function getClaim(claimId: string, companyName: string) {
+export async function getClaim(claimId: string, dateCreated: string) {
     const res = await ddbDocClient.send(
         new GetItemCommand({
             TableName: TABLE_NAME,
             Key: { 
                 id: { S: claimId },
-                companyName: { S: companyName }
+                dateCreated: { S: dateCreated }
             }
         })
     );
@@ -39,7 +40,8 @@ export async function createClaim(data: Claim) {
         new PutItemCommand({
             TableName: TABLE_NAME,
             Item: {
-                id: { S: Date.now().toString() },
+                id: { S: uuidv7() },
+                dateCreated: { S: new Date().toISOString() },
                 companyName: { S: data.companyName },
                 claimPeriod: { S: data.claimPeriod },
                 amount: { N: data.amount.toString() },
@@ -47,12 +49,12 @@ export async function createClaim(data: Claim) {
                 status: { S: data.status }
             }
         })
-    )
+    ); 
 
     return res;
 }
 
-export async function updateClaim(claimId: string, companyName: string, data: Partial<Claim>) {
+export async function updateClaim(claimId: string, dateCreated: string, data: Partial<Claim>) {
     const setFragments: string[] = []; // Used for the Update Expression, holds the dynamically determined columns that would be updated.
     const expressionAttributeValues: EAVtype = {}; // Used for the fields that have been filled in that the user wishes to update.
     const expressionAttributeNames: Record<string, string> = {}; // The names of the column/ fields that the user would be updating.
@@ -68,6 +70,7 @@ export async function updateClaim(claimId: string, companyName: string, data: Pa
         setFragments.push(`${nameKey} = ${valueKey}`);
     };
 
+    addSetter("companyName", data.companyName);
     addSetter("claimPeriod", data.claimPeriod);
     addSetter("amount", data.amount);
     addSetter("associatedProject", data.associatedProject);
@@ -82,7 +85,7 @@ export async function updateClaim(claimId: string, companyName: string, data: Pa
             TableName: TABLE_NAME,
             Key: { 
                 id: { S: claimId },
-                companyName: { S: companyName }
+                dateCreated: { S: dateCreated }
             },
             UpdateExpression: `SET ${setFragments.join(", ")}`,
             ExpressionAttributeValues: expressionAttributeValues,
@@ -92,15 +95,15 @@ export async function updateClaim(claimId: string, companyName: string, data: Pa
     return res;
 }
 
-export async function deleteClaim(claimId: string, companyName: string) {
+export async function deleteClaim(claimId: string, dateCreated: string) {
     const res = await ddbDocClient.send(
         new DeleteItemCommand({
             TableName: TABLE_NAME,
             Key: { 
                 id: {S: claimId},
-                companyName: { S: companyName }
+                dateCreated: { S: dateCreated }
             }
         })
-    )
+    );
     return res;
 }
