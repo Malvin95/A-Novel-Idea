@@ -4,7 +4,7 @@ const config: StorybookConfig = {
   "stories": [
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
-  "addons": [],
+  "addons": ["@storybook/addon-styling-webpack", "@storybook/addon-themes"],
   "framework": {
     "name": "@storybook/nextjs",
     "options": {}
