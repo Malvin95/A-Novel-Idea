@@ -5,18 +5,20 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public routes that don't require authentication
-  const publicRoutes = ["/login", "/register"];
+  const publicRoutes = ["/login", "/register", "/dashboard"]; //TODO: remove dashboard from public routes
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // Define protected routes that require authentication
-  const protectedRoutes = ["/dashboard"];
+  // const protectedRoutes = ["/dashboard"];
+  const protectedRoutes = ["/dontWorry"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  // Get the authentication token from cookies (you can adjust this based on your auth implementation)
+  // Get the authentication token from cookies. Support legacy `auth-token` plus NextAuth cookies.
   const authToken = request.cookies.get("auth-token")?.value;
-  const isAuthenticated = !!authToken;
+  const nextAuthCookie = request.cookies.get("next-auth.session-token")?.value || request.cookies.get("__Secure-next-auth.session-token")?.value;
+  const isAuthenticated = !!(authToken || nextAuthCookie);
 
   // If user is not authenticated and trying to access a protected route
   if (!isAuthenticated && isProtectedRoute) {
@@ -34,7 +36,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure which routes the middleware should run on
+// Configure which routes the proxy should run on
 export const config = {
   matcher: [
     /*
