@@ -2,11 +2,13 @@ import { status } from "./enums";
 
 export interface Project {
     id?: string,
-    name: string
+    dateCreated: string,
+    projectName: string,
 }
 
 export interface Claim {
     id?: string;
+    dateCreated?: string;
     companyName: string;
     claimPeriod: string;
     amount: number;

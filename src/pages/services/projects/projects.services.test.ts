@@ -5,44 +5,151 @@ import {
   getProjects,
   updateProject
 } from "@/pages/services/projects/projects.services";
-import { mockProjects } from "@/pages/services/stubData";
 import { Project } from "@/shared/interfaces";
+import { ddbDocClient } from "@/pages/api/lib/dynamo";
+
+jest.mock("@/pages/api/lib/dynamo", () => ({
+  ddbDocClient: {
+    send: jest.fn(),
+  },
+}));
+
+jest.mock("uuid", () => ({
+  v7: jest.fn(() => "mock-uuid-v7"),
+}));
+
+const mockSend = ddbDocClient.send as jest.MockedFunction<typeof ddbDocClient.send>;
 
 describe("projects.services", () => {
-  it("returns all projects", async () => {
-    const projects = await getProjects();
-
-    expect(projects).toBe(mockProjects);
-    expect(projects.length).toBeGreaterThan(0);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("returns a project by id", async () => {
-    const project = await getProject("1");
+  it("returns all projects", async () => {
+    const mockItems = [
+      {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        projectName: { S: "Project Alpha" },
+      },
+    ];
 
-    expect(project).toMatchObject({ id: "1" });
+    mockSend.mockResolvedValueOnce({
+      Items: mockItems,
+      Count: 1,
+      ScannedCount: 1,
+    } as any);
+
+    const result = await getProjects();
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-project-table-v2",
+        }),
+      })
+    );
+    expect(result).toHaveProperty("Items");
+    expect(result).toHaveProperty("Count");
+  });
+
+  it("returns a project by id and dateCreated", async () => {
+    const mockItem = {
+      Item: {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        projectName: { S: "Project Alpha" },
+      },
+    };
+
+    mockSend.mockResolvedValueOnce(mockItem as any);
+
+    const result = await getProject("1", "2024-01-01T00:00:00.000Z");
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-project-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+        }),
+      })
+    );
+    expect(result).toHaveProperty("Item");
   });
 
   it("creates a project", async () => {
-    const payload: Project = { name: "Created Project" };
-    const created = await createProject(payload);
+    const payload: Project = {
+      projectName: "Created Project",
+      dateCreated: "2024-01-01T00:00:00.000Z",
+    };
 
-    expect(created).toMatchObject(payload);
-    expect(created).toHaveProperty("id");
-    expect(mockProjects).toContainEqual(created);
+    mockSend.mockResolvedValueOnce({} as any);
+
+    const result = await createProject(payload);
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-project-table-v2",
+          Item: expect.objectContaining({
+            projectName: { S: "Created Project" },
+          }),
+        }),
+      })
+    );
+    expect(result).toBeDefined();
   });
 
   it("updates an existing project", async () => {
-    const testProject = { name: "Updated Name" } as Partial<Project>
-    const updated = await updateProject("1", testProject as Project);
+    const testProject: Project = {
+      projectName: "Updated Name",
+      dateCreated: "2024-01-01T00:00:00.000Z",
+    };
 
-    expect(updated).toMatchObject({ id: "1", name: "Updated Name" });
-    expect(mockProjects.find((p) => p.id === "1")).toEqual(updated);
+    mockSend.mockResolvedValueOnce({
+      Attributes: {
+        id: { S: "1" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        projectName: { S: "Updated Name" },
+      },
+    } as any);
+
+    const result = await updateProject("1", "2024-01-01T00:00:00.000Z", testProject);
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-project-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+          UpdateExpression: expect.stringContaining("#projectName = :projectName"),
+        }),
+      })
+    );
+    expect(result).toBeDefined();
   });
 
   it("deletes a project", async () => {
-    await deleteProject("1");
+    mockSend.mockResolvedValueOnce({} as any);
 
-    expect(mockProjects.find((p) => p.id === "1")).toBeUndefined();
+    await deleteProject("1", "2024-01-01T00:00:00.000Z");
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          TableName: "a-novel-project-table-v2",
+          Key: {
+            id: { S: "1" },
+            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+          },
+        }),
+      })
+    );
   });
 });
 
