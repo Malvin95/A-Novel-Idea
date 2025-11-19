@@ -1,0 +1,6 @@
+{
+  "Items": [
+    { "id": { "S": "1" }, "reference": { "S": "CLAIM-001" }, "dateCreated": { "S": "2025-03-01T00:00:00Z" } },
+    { "id": { "S": "2" }, "reference": { "S": "CLAIM-002" }, "dateCreated": { "S": "2025-04-01T00:00:00Z" } }
+  ]
+}

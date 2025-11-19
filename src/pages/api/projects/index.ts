@@ -1,7 +1,8 @@
 import { createProject, getProjects } from "@/pages/services/projects/projects.services";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { withMock } from "@/lib/api/withMock";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		if (req.method === "GET") {
 			const projects = await getProjects();
@@ -20,3 +21,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		return res.status(500).json({ error: "Internal server error" });
 	}
 }
+
+export default withMock(handler, 'projects');
