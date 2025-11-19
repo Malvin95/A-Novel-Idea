@@ -1,0 +1,6 @@
+{
+  "Items": [
+    { "id": { "S": "1" }, "name": { "S": "Project Alpha" }, "dateCreated": { "S": "2025-01-01T00:00:00Z" } },
+    { "id": { "S": "2" }, "name": { "S": "Project Beta" }, "dateCreated": { "S": "2025-02-01T00:00:00Z" } }
+  ]
+}

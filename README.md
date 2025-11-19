@@ -24,9 +24,43 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
+## Feature-flagged mocked endpoints (dev)
+
+This project supports returning developer-specified mock payloads from API routes when running in development. Use feature flags to control whether an API route returns a mock payload or runs the real handler (which hits the DB).
+
+Environment variables (recommended):
+
+- `USE_MOCKS` — global toggle (`true`/`false`). When `true`, API routes using the mock wrapper will return mock JSON files found under `src/lib/mocks/*.json`.
+- `FEATURE_FLAGS_JSON` — optional JSON string mapping per-endpoint flags, for example: `{"projects":true,"claims":false}`.
+- `DEV_ALWAYS_MOCK` — set `true` to force mocks even when `NODE_ENV=production` (use with caution).
+
+Examples:
+
+Create a `.env.local` with:
+
+```dotenv
+USE_MOCKS=true
+FEATURE_FLAGS_JSON={"projects":true,"claims":true}
+```
+
+Mock files are stored in `src/lib/mocks/` and are served when mocking is enabled. The API wrapper used by routes is `src/lib/api/withMock.ts`.
+
+To run development with mocks enabled:
+
+```powershell
+#$env:USE_MOCKS='true'; npm run dev
+npm run dev
+```
+
+To run dev forcing DB behavior (ensure DB credentials are available):
+
+```powershell
+#$env:USE_MOCKS='false'; npm run dev
+npm run dev
+```
+
+See `src/lib/featureFlags.ts` and `src/lib/api/withMock.ts` for implementation details.
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel

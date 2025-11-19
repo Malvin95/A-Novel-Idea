@@ -1,7 +1,8 @@
 import { createClaim, getClaims } from "@/pages/services/claims/claims.service";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { withMock } from "@/lib/api/withMock";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		if (req.method === "GET") {
 			const claims = await getClaims();
@@ -20,3 +21,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		return res.status(500).json({ error: "Internal server error" });
 	}
 }
+
+export default withMock(handler, 'claims');

@@ -1,7 +1,8 @@
 import { getClaim, updateClaim, deleteClaim } from "@/pages/services/claims/claims.service";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { withMock } from "@/lib/api/withMock";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
 	const { id, dateCreated } = req.query;
 
 	try {
@@ -37,3 +38,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		return res.status(500).json({ error: "Server error" });
 	}
 }
+
+export default withMock(handler, 'claims');
