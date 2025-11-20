@@ -1,6 +1,44 @@
 {
   "Items": [
-    { "id": { "S": "1" }, "name": { "S": "Project Alpha" }, "dateCreated": { "S": "2025-01-01T00:00:00Z" } },
-    { "id": { "S": "2" }, "name": { "S": "Project Beta" }, "dateCreated": { "S": "2025-02-01T00:00:00Z" } }
+    { 
+      "id": { "S": "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" }, 
+      "projectName": { "S": "AI-Powered Customer Analytics Platform" }, 
+      "dateCreated": { "S": "2024-01-15T09:30:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c60-1f3b-7c4d-8e5f-d2e3f4a5b6c7" }, 
+      "projectName": { "S": "Quantum Computing Research Initiative" }, 
+      "dateCreated": { "S": "2024-03-22T14:15:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c61-2g4c-7d5e-9f6g-e3f4a5b6c7d8" }, 
+      "projectName": { "S": "Blockchain Supply Chain Tracker" }, 
+      "dateCreated": { "S": "2024-05-10T11:45:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c62-3h5d-7e6f-0g7h-f4a5b6c7d8e9" }, 
+      "projectName": { "S": "Machine Learning Medical Diagnostics" }, 
+      "dateCreated": { "S": "2024-06-18T08:20:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c63-4i6e-7f7g-1h8i-a5b6c7d8e9f0" }, 
+      "projectName": { "S": "IoT Smart City Infrastructure" }, 
+      "dateCreated": { "S": "2024-07-25T16:00:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c64-5j7f-7g8h-2i9j-b6c7d8e9f0a1" }, 
+      "projectName": { "S": "Advanced Robotics Automation System" }, 
+      "dateCreated": { "S": "2024-09-03T10:30:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c65-6k8g-7h9i-3j0k-c7d8e9f0a1b2" }, 
+      "projectName": { "S": "Green Energy Optimization Software" }, 
+      "dateCreated": { "S": "2024-10-12T13:45:00.000Z" } 
+    },
+    { 
+      "id": { "S": "01939c66-7l9h-7i0j-4k1l-d8e9f0a1b2c3" }, 
+      "projectName": { "S": "Cybersecurity Threat Detection Platform" }, 
+      "dateCreated": { "S": "2024-11-20T15:20:00.000Z" } 
+    }
   ]
 }

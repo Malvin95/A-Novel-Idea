@@ -28,9 +28,9 @@ describe("projects.services", () => {
   it("returns all projects", async () => {
     const mockItems = [
       {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Project Alpha" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "AI-Powered Customer Analytics Platform" },
       },
     ];
 
@@ -56,23 +56,23 @@ describe("projects.services", () => {
   it("returns a project by id and dateCreated", async () => {
     const mockItem = {
       Item: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Project Alpha" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "AI-Powered Customer Analytics Platform" },
       },
     };
 
     mockSend.mockResolvedValueOnce(mockItem as any);
 
-    const result = await getProject("1", "2024-01-01T00:00:00.000Z");
+    const result = await getProject("01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6", "2024-01-15T09:30:00.000Z");
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-project-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+            dateCreated: { S: "2024-01-15T09:30:00.000Z" },
           },
         }),
       })
@@ -82,8 +82,8 @@ describe("projects.services", () => {
 
   it("creates a project", async () => {
     const payload: Project = {
-      projectName: "Created Project",
-      dateCreated: "2024-01-01T00:00:00.000Z",
+      projectName: "New Research Project",
+      dateCreated: "2024-01-15T09:30:00.000Z",
     };
 
     mockSend.mockResolvedValueOnce({} as any);
@@ -95,7 +95,7 @@ describe("projects.services", () => {
         input: expect.objectContaining({
           TableName: "a-novel-project-table-v2",
           Item: expect.objectContaining({
-            projectName: { S: "Created Project" },
+            projectName: { S: "New Research Project" },
           }),
         }),
       })
@@ -105,27 +105,27 @@ describe("projects.services", () => {
 
   it("updates an existing project", async () => {
     const testProject: Project = {
-      projectName: "Updated Name",
-      dateCreated: "2024-01-01T00:00:00.000Z",
+      projectName: "Updated AI Platform",
+      dateCreated: "2024-01-15T09:30:00.000Z",
     };
 
     mockSend.mockResolvedValueOnce({
       Attributes: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Updated Name" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "Updated AI Platform" },
       },
     } as any);
 
-    const result = await updateProject("1", "2024-01-01T00:00:00.000Z", testProject);
+    const result = await updateProject("01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6", "2024-01-15T09:30:00.000Z", testProject);
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-project-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+            dateCreated: { S: "2024-01-15T09:30:00.000Z" },
           },
           UpdateExpression: expect.stringContaining("#projectName = :projectName"),
         }),
@@ -137,15 +137,15 @@ describe("projects.services", () => {
   it("deletes a project", async () => {
     mockSend.mockResolvedValueOnce({} as any);
 
-    await deleteProject("1", "2024-01-01T00:00:00.000Z");
+    await deleteProject("01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6", "2024-01-15T09:30:00.000Z");
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-project-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+            dateCreated: { S: "2024-01-15T09:30:00.000Z" },
           },
         }),
       })

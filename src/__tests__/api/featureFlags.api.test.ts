@@ -36,13 +36,13 @@ describe("Feature flag mock behavior", () => {
     expect(projRes.status).toBe(200);
     expect(Array.isArray(projRes.body.Items)).toBe(true);
     expect(projRes.body.Items.length).toBeGreaterThan(0);
-    // mock file has Project Alpha
-    expect(projRes.body.Items[0].name.S).toBe("Project Alpha");
+    // mock file has AI-Powered Customer Analytics Platform
+    expect(projRes.body.Items[0].projectName.S).toBe("AI-Powered Customer Analytics Platform");
 
     const claimsRes = await request(app).get("/api/claims");
     expect(claimsRes.status).toBe(200);
     expect(Array.isArray(claimsRes.body.Items)).toBe(true);
-    expect(claimsRes.body.Items[0].reference.S).toBe("CLAIM-001");
+    expect(claimsRes.body.Items[0].companyName.S).toBe("TechVision Solutions Ltd");
   });
 
   it("calls DB path when USE_MOCKS=false", async () => {
