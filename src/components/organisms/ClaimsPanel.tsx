@@ -7,7 +7,11 @@ import { Button } from "../atoms/ui/button";
 import { Edit2Icon, Trash2 } from "lucide-react";
 import { H1, H3 } from "../atoms/Typography";
 
-export default function ClaimsPanel() {
+interface ClaimsPanelProps {
+  onRefreshNeeded?: (refreshFn: () => void) => void;
+}
+
+export default function ClaimsPanel({ onRefreshNeeded }: ClaimsPanelProps) {
   const [items, setItems] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +40,12 @@ export default function ClaimsPanel() {
       mounted = false;
     };
   }, [fetchClaims]);
+
+  useEffect(() => {
+    if (onRefreshNeeded) {
+      onRefreshNeeded(fetchClaims);
+    }
+  }, [onRefreshNeeded, fetchClaims]);
 
   return (
     <div>

@@ -1,8 +1,22 @@
+"use client";
+import { useState } from "react";
 import ClaimsPanel from "@/components/organisms/ClaimsPanel";
 import { H1, P } from "@/components/atoms/Typography";
-import Button from "@/components/atoms/Button";
+import NewClaimDialogButton from "@/components/molecules/NewClaimDialogButton";
 
 export default function ClaimsPage() {
+  const [refreshClaims, setRefreshClaims] = useState<(() => void) | null>(null);
+
+  const handleRefreshNeeded = (refreshFn: () => void) => {
+    setRefreshClaims(() => refreshFn);
+  };
+
+  const handleClaimCreated = () => {
+    if (refreshClaims) {
+      refreshClaims();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -10,12 +24,10 @@ export default function ClaimsPage() {
           <H1>Claims</H1>
           <P>View and manage your claims</P>
         </div>
-        <Button className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-100">
-          New Claim
-        </Button>
+        <NewClaimDialogButton onClaimCreated={handleClaimCreated} />
       </div>
 
-      <ClaimsPanel />
+      <ClaimsPanel onRefreshNeeded={handleRefreshNeeded} />
     </div>
   );
 }

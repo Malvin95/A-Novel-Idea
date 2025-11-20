@@ -7,7 +7,11 @@ import { Button } from "../atoms/ui/button";
 import { Edit2Icon, Trash2 } from "lucide-react";
 import { H3 } from "../atoms/Typography";
 
-export default function ProjectsPanel() {
+interface ProjectsPanelProps {
+  onRefreshNeeded?: (refreshFn: () => void) => void;
+}
+
+export default function ProjectsPanel({ onRefreshNeeded }: ProjectsPanelProps) {
   const [items, setItems] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +40,12 @@ export default function ProjectsPanel() {
       mounted = false;
     };
   }, [fetchProjects]);
+
+  useEffect(() => {
+    if (onRefreshNeeded) {
+      onRefreshNeeded(fetchProjects);
+    }
+  }, [onRefreshNeeded, fetchProjects]);
 
   return (
     <div>
