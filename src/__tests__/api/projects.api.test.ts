@@ -1,10 +1,10 @@
 import request from "supertest";
 import projectHandler from "@/pages/api/projects/[id]";
 import projectsHandler from "@/pages/api/projects/index";
-import { createApiTestApp } from "../testServer";
-import { ddbDocClient } from "@/pages/api/lib/dynamo";
+import { createApiTestApp } from "./testServer";
+import { ddbDocClient } from "@/lib/dynamo";
 
-jest.mock("@/pages/api/lib/dynamo", () => ({
+jest.mock("@/lib/dynamo", () => ({
   ddbDocClient: { send: jest.fn() },
 }));
 

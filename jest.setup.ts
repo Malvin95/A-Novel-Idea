@@ -1,4 +1,4 @@
-import { mockClaims, mockProjects } from "@/pages/services/stubData";
+import { mockClaims, mockProjects } from "@/services/stubData";
 
 const initialProjects = mockProjects.map((project) => ({ ...project }));
 const initialClaims = mockClaims.map((claim) => ({ ...claim }));

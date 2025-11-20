@@ -2,8 +2,8 @@ import { Claim, Project } from "@/shared/interfaces";
 import { status } from "@/shared/enums";
 
 export const mockProjects: Project[] = [
-    { id: "1", name: "Project Alpha" },
-    { id: "2", name: "Project Beta" }
+    { id: "1", dateCreated: "2024-01-01T00:00:00.000Z", projectName: "Project Alpha" },
+    { id: "2", dateCreated: "2024-02-01T00:00:00.000Z", projectName: "Project Beta" }
 ];
 
 export const mockClaims: Claim[] = [
