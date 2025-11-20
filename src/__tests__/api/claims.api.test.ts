@@ -8,6 +8,18 @@ jest.mock("@/lib/dynamo", () => ({
   ddbDocClient: { send: jest.fn() },
 }));
 
+// Mock NextAuth to return authenticated session with admin role
+jest.mock("next-auth/next", () => ({
+  getServerSession: jest.fn(() => Promise.resolve({
+    user: {
+      id: "test-user-123",
+      email: "test@example.com",
+      name: "Test User",
+      roles: ["admin"], // Admin has all permissions
+    },
+  })),
+}));
+
 const mockSend = ddbDocClient.send as unknown as jest.Mock;
 
 const app = createApiTestApp([
@@ -141,6 +153,134 @@ describe("Claims API", () => {
       "/api/claims/01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f?dateCreated=2024-04-15T10:30:00.000Z"
     );
     expect(getResponse.status).toBe(404);
+  });
+});
+
+describe("Claims API - Authorization", () => {
+  const originalEnv = process.env;
+  const { getServerSession } = require("next-auth/next");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env = { ...originalEnv, USE_MOCKS: "false" };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    // Mock no session (not authenticated)
+    getServerSession.mockResolvedValueOnce(null);
+
+    const response = await request(app).get("/api/claims");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toContain("Unauthorized");
+  });
+
+  it("returns 403 when user lacks permission to create claims", async () => {
+    // Mock session with viewer role (no create permission)
+    getServerSession.mockResolvedValueOnce({
+      user: {
+        id: "test-user-456",
+        email: "viewer@example.com",
+        name: "Viewer User",
+        roles: ["viewer"],
+      },
+    });
+
+    const payload = {
+      companyName: "Test Company",
+      claimPeriod: "2024-Q4",
+      amount: 100000,
+      associatedProject: "Test Project",
+      status: "Draft",
+    };
+
+    const response = await request(app).post("/api/claims").send(payload);
+
+    expect(response.status).toBe(403);
+    expect(response.body.error).toContain("permission");
+    expect(response.body.yourRoles).toEqual(["viewer"]);
+  });
+
+  it("allows employee to create claims", async () => {
+    // Mock session with employee role (has create permission)
+    getServerSession.mockResolvedValueOnce({
+      user: {
+        id: "test-user-789",
+        email: "employee@example.com",
+        name: "Employee User",
+        roles: ["employee"],
+      },
+    });
+
+    const payload = {
+      companyName: "Test Company",
+      claimPeriod: "2024-Q4",
+      amount: 100000,
+      associatedProject: "Test Project",
+      status: "Draft",
+    };
+
+    const createdItem = {
+      Item: {
+        id: { S: "new-claim-id" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        companyName: { S: payload.companyName },
+        claimPeriod: { S: payload.claimPeriod },
+        amount: { N: payload.amount.toString() },
+        associatedProject: { S: payload.associatedProject },
+        status: { S: payload.status },
+      },
+    } as any;
+
+    mockSend.mockResolvedValueOnce(createdItem);
+
+    const response = await request(app).post("/api/claims").send(payload);
+
+    expect(response.status).toBe(201);
+    expect(response.body.Item.companyName.S).toBe(payload.companyName);
+  });
+
+  it("allows manager to create claims", async () => {
+    // Mock session with manager role (has create permission)
+    getServerSession.mockResolvedValueOnce({
+      user: {
+        id: "test-user-999",
+        email: "manager@example.com",
+        name: "Manager User",
+        roles: ["manager"],
+      },
+    });
+
+    const payload = {
+      companyName: "Test Company",
+      claimPeriod: "2024-Q4",
+      amount: 100000,
+      associatedProject: "Test Project",
+      status: "Draft",
+    };
+
+    const createdItem = {
+      Item: {
+        id: { S: "new-claim-id-2" },
+        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        companyName: { S: payload.companyName },
+        claimPeriod: { S: payload.claimPeriod },
+        amount: { N: payload.amount.toString() },
+        associatedProject: { S: payload.associatedProject },
+        status: { S: payload.status },
+      },
+    } as any;
+
+    mockSend.mockResolvedValueOnce(createdItem);
+
+    const response = await request(app).post("/api/claims").send(payload);
+
+    expect(response.status).toBe(201);
+    expect(response.body.Item.companyName.S).toBe(payload.companyName);
   });
 });
 

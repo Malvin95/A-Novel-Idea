@@ -8,6 +8,18 @@ jest.mock("@/lib/dynamo", () => ({
   ddbDocClient: { send: jest.fn() },
 }));
 
+// Mock NextAuth to return authenticated session with admin role
+jest.mock("next-auth/next", () => ({
+  getServerSession: jest.fn(() => Promise.resolve({
+    user: {
+      id: "test-user-123",
+      email: "test@example.com",
+      name: "Test User",
+      roles: ["admin"], // Admin has all permissions
+    },
+  })),
+}));
+
 const mockSend = ddbDocClient.send as unknown as jest.Mock;
 
 const app = createApiTestApp([
