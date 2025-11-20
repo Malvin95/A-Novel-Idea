@@ -1,8 +1,8 @@
-import { Button } from "../atoms/ui/button";
 import { H3 } from "../atoms/Typography";
-import { Edit2Icon } from "lucide-react";
 import { Project, Claim } from "@/shared/interfaces";
 import DeleteDialogButton from "./DeleteDialogButton";
+import EditProjectDialogButton from "./EditProjectDialogButton";
+import EditClaimDialogButton from "./EditClaimDialogButton";
 
 interface InfoCardProps {
   item: Project | Claim;
@@ -46,14 +46,20 @@ export default function InfoCard({ item, type, onEdit, onDelete }: InfoCardProps
           {type === "project" ? renderProjectContent(item as Project) : renderClaimContent(item as Claim)}
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2 md:flex-row">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            aria-label="Edit"
-            onClick={onEdit}
-          >
-            <Edit2Icon width="15" height="15" />
-          </Button>
+          {type === "project" && onEdit && (
+            <EditProjectDialogButton
+              project={item as Project}
+              onProjectUpdated={onEdit}
+              variant="icon"
+            />
+          )}
+          {type === "claim" && onEdit && (
+            <EditClaimDialogButton
+              claim={item as Claim}
+              onClaimUpdated={onEdit}
+              variant="icon"
+            />
+          )}
           {onDelete && (
             <DeleteDialogButton
               itemName={

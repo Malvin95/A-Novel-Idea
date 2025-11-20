@@ -84,7 +84,7 @@ export default function ClaimsPanel({ onRefreshNeeded }: ClaimsPanelProps) {
             key={idx}
             item={it}
             type="claim"
-            onEdit={() => console.log("Edit claim:", it.id)}
+            onEdit={() => fetchClaims()}
             onDelete={() => handleDeleteClaim(it.id, it.dateCreated)}
           />
         ))}
