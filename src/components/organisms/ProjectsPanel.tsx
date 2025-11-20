@@ -14,6 +14,27 @@ export default function ProjectsPanel({ onRefreshNeeded }: ProjectsPanelProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDeleteProject = async (id: string | undefined, dateCreated: string) => {
+    if (!id) return;
+    
+    try {
+      const response = await fetch(`/api/projects/${id}?dateCreated=${encodeURIComponent(dateCreated)}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete project: ${response.statusText}`);
+      }
+
+      // Refresh the list after successful deletion
+      await fetchProjects();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Error deleting project:", msg);
+      setError(msg);
+    }
+  };
+
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -64,7 +85,7 @@ export default function ProjectsPanel({ onRefreshNeeded }: ProjectsPanelProps) {
             item={it}
             type="project"
             onEdit={() => console.log("Edit project:", it.id)}
-            onDelete={() => console.log("Delete project:", it.id)}
+            onDelete={() => handleDeleteProject(it.id, it.dateCreated)}
           />
         ))}
       </div>

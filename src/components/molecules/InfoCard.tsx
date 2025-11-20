@@ -1,13 +1,14 @@
 import { Button } from "../atoms/ui/button";
 import { H3 } from "../atoms/Typography";
-import { Edit2Icon, Trash2 } from "lucide-react";
+import { Edit2Icon } from "lucide-react";
 import { Project, Claim } from "@/shared/interfaces";
+import DeleteDialogButton from "./DeleteDialogButton";
 
 interface InfoCardProps {
   item: Project | Claim;
   type: "project" | "claim";
   onEdit?: () => void;
-  onDelete?: () => void;
+  onDelete?: () => void | Promise<void>;
 }
 
 export default function InfoCard({ item, type, onEdit, onDelete }: InfoCardProps) {
@@ -53,14 +54,18 @@ export default function InfoCard({ item, type, onEdit, onDelete }: InfoCardProps
           >
             <Edit2Icon width="15" height="15" />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            aria-label="Delete"
-            onClick={onDelete}
-          >
-            <Trash2 width="15" height="15" />
-          </Button>
+          {onDelete && (
+            <DeleteDialogButton
+              itemName={
+                type === "project" 
+                  ? (item as Project).projectName || "this project"
+                  : (item as Claim).companyName || "this claim"
+              }
+              itemType={type}
+              onConfirmDelete={onDelete}
+              variant="icon"
+            />
+          )}
         </div>
       </div>
     </div>

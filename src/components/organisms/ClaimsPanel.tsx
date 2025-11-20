@@ -14,6 +14,27 @@ export default function ClaimsPanel({ onRefreshNeeded }: ClaimsPanelProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDeleteClaim = async (id: string | undefined, dateCreated: string | undefined) => {
+    if (!id || !dateCreated) return;
+    
+    try {
+      const response = await fetch(`/api/claims/${id}?dateCreated=${encodeURIComponent(dateCreated)}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete claim: ${response.statusText}`);
+      }
+
+      // Refresh the list after successful deletion
+      await fetchClaims();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Error deleting claim:", msg);
+      setError(msg);
+    }
+  };
+
   const fetchClaims = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -64,7 +85,7 @@ export default function ClaimsPanel({ onRefreshNeeded }: ClaimsPanelProps) {
             item={it}
             type="claim"
             onEdit={() => console.log("Edit claim:", it.id)}
-            onDelete={() => console.log("Delete claim:", it.id)}
+            onDelete={() => handleDeleteClaim(it.id, it.dateCreated)}
           />
         ))}
       </div>
