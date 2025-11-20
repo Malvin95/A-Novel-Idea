@@ -12,8 +12,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [useMockAuth, setUseMockAuth] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
+
+  // Check if mock auth is enabled
+  useEffect(() => {
+    const checkMockAuth = async () => {
+      try {
+        const res = await fetch("/api/config/auth-mode");
+        const data = await res.json();
+        setUseMockAuth(data.useMockAuth || false);
+      } catch {
+        setUseMockAuth(false);
+      }
+    };
+    checkMockAuth();
+  }, []);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -27,7 +42,32 @@ export default function LoginPage() {
     }
   }, [status, router, session]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleMockSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const result = await signIn("mock-credentials", {
+        redirect: false,
+        email,
+        password,
+        callbackUrl: "/dashboard",
+      });
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.ok) {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError((err as Error)?.message || "Mock sign-in failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCognitoSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -58,19 +98,27 @@ export default function LoginPage() {
     }
   }
 
+  const handleSubmit = useMockAuth ? handleMockSubmit : handleCognitoSubmit;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg dark:bg-zinc-900">
         <div>
           <H1>Sign in to your account</H1>
-          <P>Enter your details to access the dashboard or use the Cognito sign-in button below.</P>
+          <P>
+            {useMockAuth
+              ? "🧪 Mock Auth Mode - Enter any email to sign in (dev only)"
+              : "Enter your details to access the dashboard or use the Cognito sign-in button below."}
+          </P>
         </div>
 
-        <div className="space-y-4">
-          <Button type="button" onClick={() => signIn("cognito", { callbackUrl: "/dashboard" })} className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            Sign in with Cognito
-          </Button>
-        </div>
+        {!useMockAuth && (
+          <div className="space-y-4">
+            <Button type="button" onClick={() => signIn("cognito", { callbackUrl: "/dashboard" })} className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              Sign in with Cognito
+            </Button>
+          </div>
+        )}
 
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">

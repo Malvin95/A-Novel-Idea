@@ -1,16 +1,43 @@
 import CognitoProvider from "next-auth/providers/cognito";
+import CredentialsProvider from "next-auth/providers/credentials";
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
+const useMockAuth = process.env.USE_MOCK_AUTH === "true";
+
 export const authOptions: NextAuthOptions = {
-  providers: [
-    CognitoProvider({
-      clientId: process.env.COGNITO_CLIENT_ID || "",
-      clientSecret: process.env.COGNITO_CLIENT_SECRET || '',
-      issuer: process.env.COGNITO_ISSUER || undefined,
-    }),
-  ],
+  providers: useMockAuth
+    ? [
+        // Mock Credentials Provider for development
+        CredentialsProvider({
+          id: "mock-credentials",
+          name: "Mock Auth (Dev Only)",
+          credentials: {
+            email: { label: "Email", type: "email", placeholder: "dev@example.com" },
+            password: { label: "Password", type: "password" },
+          },
+          async authorize(credentials) {
+            // Accept any email/password in development
+            if (credentials?.email) {
+              return {
+                id: "mock-user-123",
+                email: credentials.email,
+                name: credentials.email.split("@")[0],
+              };
+            }
+            return null;
+          },
+        }),
+      ]
+    : [
+        // Real Cognito Provider for production
+        CognitoProvider({
+          clientId: process.env.COGNITO_CLIENT_ID || "",
+          clientSecret: process.env.COGNITO_CLIENT_SECRET || "",
+          issuer: process.env.COGNITO_ISSUER || undefined,
+        }),
+      ],
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -35,7 +62,11 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log("✅ SignIn callback - User authenticated:", user?.email);
+      if (useMockAuth) {
+        console.log("🧪 Mock SignIn - User authenticated:", user?.email);
+      } else {
+        console.log("✅ SignIn callback - User authenticated:", user?.email);
+      }
       // Allow sign in
       return true;
     },
@@ -60,12 +91,17 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, user }) {
       // Initial sign in
       if (account) {
-        console.log("🎫 JWT callback - Creating token for user:", user?.email);
-        console.log("   Account provider:", account.provider);
-        console.log("   Has access_token:", !!account.access_token);
+        if (useMockAuth) {
+          console.log("🧪 Mock JWT - Creating token for user:", user?.email);
+        } else {
+          console.log("🎫 JWT callback - Creating token for user:", user?.email);
+          console.log("   Account provider:", account.provider);
+          console.log("   Has access_token:", !!account.access_token);
+        }
         // Only store essential info to keep cookie size small
         token.sub = user?.id;
         token.email = user?.email;
+        token.name = user?.name;
         // Don't store full tokens in cookie to reduce size
         // token.accessToken = account.access_token;
         // token.idToken = account.id_token;
@@ -81,7 +117,7 @@ export const authOptions: NextAuthOptions = {
       console.log("📋 Session callback - Creating session for:", token.email);
       // Add user info to session
       if (session.user) {
-        session.user.id = token.sub as string;
+        (session.user as any).id = token.sub as string;
       }
       return session;
     },
