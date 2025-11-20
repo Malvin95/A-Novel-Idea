@@ -18,11 +18,12 @@ export default function ProjectsPanel() {
     try {
       const response = await fetch("/api/projects");
       const data = await response.json();
-      const normalized = normalizeItemsResponse(data);
-      const list = Array.isArray(normalized?.Items) ? normalized.Items : [];
-      setItems(list);
+      const normalized = normalizeItemsResponse(data) as Record<string, unknown>;
+      const list = Array.isArray(normalized?.Items as unknown) ? (normalized.Items as unknown[]) : [];
+      setItems(list as Project[]);
     } catch (err: any) {
-      setError(String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
     } finally {
       setLoading(false);
     }

@@ -18,11 +18,12 @@ export default function ClaimsPanel() {
     try {
       const r = await fetch("/api/claims");
       const data = await r.json();
-      const normalized = normalizeItemsResponse(data);
-      const list = Array.isArray(normalized?.Items) ? normalized.Items : [];
-      setItems(list);
-    } catch (err: any) {
-      setError(String(err));
+      const normalized = normalizeItemsResponse(data) as Record<string, unknown>;
+      const list = Array.isArray(normalized?.Items as unknown) ? (normalized.Items as unknown[]) : [];
+      setItems(list as Claim[]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
     } finally {
       setLoading(false);
     }
