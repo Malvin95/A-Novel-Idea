@@ -16,14 +16,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Quick start for mocked development (TL;DR)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
+```powershell
+#$env:USE_MOCKS='true'; USE_MOCK_AUTH=true
+npm run dev
+```
 
 ## Feature-flagged mocked endpoints (dev)
 
@@ -48,13 +46,6 @@ FEATURE_FLAGS_JSON={"projects":true,"claims":true}
 
 Mock files are stored in `src/lib/mocks/` and are served when mocking is enabled. The API wrapper used by routes is `src/lib/api/withMock.ts`.
 
-To run development with mocks enabled:
-
-```powershell
-#$env:USE_MOCKS='true'; npm run dev
-npm run dev
-```
-
 To run dev forcing DB behavior (ensure DB credentials are available):
 
 ```powershell
@@ -63,10 +54,33 @@ npm run dev
 ```
 
 See `src/lib/featureFlags.ts` and `src/lib/api/withMock.ts` for implementation details.
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+# Reflections
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Architecture Decisions
+For development I decided to use next JS as the react framework that would allow me to easily set up a project that would also utilise AWS features as nextJS Integrates with AWS very well, I then decided to use TailwindCSS as it easily allows me to style components in a clear in Direct way and I further used Shadcn which is radix under the hood, allowing me to use a component library to quickly build the dashboard, whilst also having more flexibility and control over styling.
+For the backend, I used NextJS API routing with NextAuth and AWS Cognito, DynamoDB for databasing, and some of the AWS SDK for easy connection to DynamoDB. 
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+My heavy focus on using NextJS was primarily because of the serverless infrastructure provided by Vercel, which allows your code to be easily deployed to via GitHub. Since it typically runs the backend of the application on AWS Lambdas, it made the ground-up development of the application a very good fit for the requirements of this coding challenge. Add on top of that the fact that ReactJS integrates directly with and is managed by Vercel, NextJS was the logical decision.
+
+API handling would be done via the projects structure, which meant that handling routing of the application and data handling for CRUD actions would be easier since data could easily be handled via the next API request and response handlers that would know a route based on the project files location
+e.g. `C:/*/app/api/projects/index.ts` would handle `http://localhost:3000/api/projects`
+And from there we could do our own CRUD actions if we specified them. And even further specifying `http://localhost:3000/api/projects/12345` would allow us to perform actions on a specific item.
+
+
+## AI Usage
+To build the app, I did utilise AI to handle a lot of repetitive or heavy lifting tasks I used it for:
+- handling the pr checklists 
+- handling commit messages generated (CoPilot)
+- whenever I needed to ‘rubber duck’ and understand what the logic for something could be.
+- being able to bugsniff
+- handle that generation of frontend components
+- Generate tests and documentation
+
+There are a couple of ways that AI would have been implemented, either by my conceptual understanding of what would be needed and a first pass implementation, or by asking the AI how it would handle something that has already been built, but there has been a blocker that has halted my progress.
+Before anything would be committed, I would then read over everything to know: what has been changed, how the change affects the code base, and why it has been changed. Additionally, this would all be done iteratively, so features would have been focused on and started out small so that each merge could be understood and would be trackable.
+The risks I did spot could be a further issue with removing my hands from the wheel and almost letting AI build the app top to bottom without understanding what has been implemented. Although the idea of it seems like a dream, it would be hollow, as you run possible security risks and code that isn’t the most human-readable. Despite this, I’ve tried to ensure that the code has had my input firmly throughout.
+
+## Improvements
+With more time, I would have hoped to have implemented a lot more concerning the authentication so that it's not just Cognito doing a lot of the heavy lifting, but instead NextAuth that would also be able to handle the logging in easily, this would allow the UI to be consistent and clean. I would also like to have cleaned up the UI so that the UI is a bit more effectively readable and human-friendly. 
+
