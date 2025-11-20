@@ -32,6 +32,7 @@ This project supports returning developer-specified mock payloads from API route
 Environment variables (recommended):
 
 - `USE_MOCKS` — global toggle (`true`/`false`). When `true`, API routes using the mock wrapper will return mock JSON files found under `src/lib/mocks/*.json`.
+- `USE_MOCK_AUTH` — enable mock authentication (`true`/`false`). When `true`, you can sign in with any email/password without AWS Cognito. [Learn more](docs/MOCK_AUTH.md)
 - `FEATURE_FLAGS_JSON` — optional JSON string mapping per-endpoint flags, for example: `{"projects":true,"claims":false}`.
 - `DEV_ALWAYS_MOCK` — set `true` to force mocks even when `NODE_ENV=production` (use with caution).
 
@@ -41,6 +42,7 @@ Create a `.env.local` with:
 
 ```dotenv
 USE_MOCKS=true
+USE_MOCK_AUTH=true
 FEATURE_FLAGS_JSON={"projects":true,"claims":true}
 ```
 
