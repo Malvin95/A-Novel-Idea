@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog";
 import Input from "@/components/atoms/Input";
+import ProjectSelect from "@/components/molecules/ProjectSelect";
 import { useState } from "react";
 import { status } from "@/shared/enums";
 
@@ -97,13 +98,12 @@ export default function NewClaimDialogButton({ onClaimCreated }: NewClaimDialogB
                                 onChange={setCompanyName}
                                 type="text"
                                 placeholder="Acme Corporation" />
-                            <Input 
-                                id="associated-project" 
-                                label="Associated Project" 
-                                value={associatedProject} 
+                            <ProjectSelect
+                                value={associatedProject}
                                 onChange={setAssociatedProject}
-                                type="text"
-                                placeholder="Project Alpha" />
+                                label="Associated Project"
+                                placeholder="Select a project"
+                            />
                             <Input 
                                 id="claim-period" 
                                 label="Claim Period" 

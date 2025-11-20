@@ -3,6 +3,7 @@
 import { Button } from "@/components/atoms/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/atoms/dialog";
 import Input from "@/components/atoms/Input";
+import ProjectSelect from "@/components/molecules/ProjectSelect";
 import { useState, useEffect } from "react";
 import { Edit2Icon } from "lucide-react";
 import { Claim } from "@/shared/interfaces";
@@ -107,13 +108,12 @@ export default function EditClaimDialogButton({ claim, onClaimUpdated, variant =
                             onChange={setCompanyName}
                             type="text"
                             placeholder="Acme Corporation" />
-                        <Input 
-                            id="associated-project" 
-                            label="Associated Project" 
-                            value={associatedProject} 
+                        <ProjectSelect
+                            value={associatedProject}
                             onChange={setAssociatedProject}
-                            type="text"
-                            placeholder="Project Alpha" />
+                            label="Associated Project"
+                            placeholder="Select a project"
+                        />
                         <Input 
                             id="claim-period" 
                             label="Claim Period" 
