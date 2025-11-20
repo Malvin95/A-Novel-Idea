@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import { H1, P } from "@/components/atoms/Typography";
