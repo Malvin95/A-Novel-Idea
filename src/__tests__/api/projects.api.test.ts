@@ -34,9 +34,9 @@ describe("Projects API", () => {
   it("returns all projects", async () => {
     const mockItems = [
       {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Project Alpha" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "AI-Powered Customer Analytics Platform" },
       },
     ];
 
@@ -74,39 +74,39 @@ describe("Projects API", () => {
   it("retrieves a project by id", async () => {
     const mockItem = {
       Item: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Project Alpha" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "AI-Powered Customer Analytics Platform" },
       },
     } as unknown;
 
     mockSend.mockResolvedValueOnce(mockItem);
 
-    const response = await request(app).get("/api/projects/1?dateCreated=2024-01-01T00:00:00.000Z");
+    const response = await request(app).get("/api/projects/01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6?dateCreated=2024-01-15T09:30:00.000Z");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("Item");
-    expect(response.body.Item.id.S).toBe("1");
+    expect(response.body.Item.id.S).toBe("01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6");
   });
 
   it("updates a project", async () => {
     const updatedAttributes = {
       Attributes: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        projectName: { S: "Renamed Project" },
+        id: { S: "01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6" },
+        dateCreated: { S: "2024-01-15T09:30:00.000Z" },
+        projectName: { S: "Updated AI Platform" },
       },
     } as unknown;
 
     mockSend.mockResolvedValueOnce(updatedAttributes);
 
     const response = await request(app)
-      .patch("/api/projects/1?dateCreated=2024-01-01T00:00:00.000Z")
-      .send({ projectName: "Renamed Project" });
+      .patch("/api/projects/01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6?dateCreated=2024-01-15T09:30:00.000Z")
+      .send({ projectName: "Updated AI Platform" });
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("Attributes");
-    expect(response.body.Attributes.projectName.S).toBe("Renamed Project");
+    expect(response.body.Attributes.projectName.S).toBe("Updated AI Platform");
   });
 
   it("deletes a project", async () => {
@@ -115,13 +115,13 @@ describe("Projects API", () => {
     mockSend.mockResolvedValueOnce({} as unknown).mockResolvedValueOnce(null as unknown);
 
     const deleteResponse = await request(app).delete(
-      "/api/projects/1?dateCreated=2024-01-01T00:00:00.000Z"
+      "/api/projects/01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6?dateCreated=2024-01-15T09:30:00.000Z"
     );
 
     expect(deleteResponse.status).toBe(204);
 
     const getResponse = await request(app).get(
-      "/api/projects/1?dateCreated=2024-01-01T00:00:00.000Z"
+      "/api/projects/01939c5f-8e2a-7a3b-9f4e-c1d2e3f4a5b6?dateCreated=2024-01-15T09:30:00.000Z"
     );
     expect(getResponse.status).toBe(404);
   });

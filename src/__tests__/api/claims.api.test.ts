@@ -34,13 +34,13 @@ describe("Claims API", () => {
   it("lists claims", async () => {
     const mockItems = [
       {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        companyName: { S: "Test Company" },
-        claimPeriod: { S: "2024-01" },
-        amount: { N: "1000" },
-        associatedProject: { S: "Project Alpha" },
-        status: { S: "DRAFT" },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
+        companyName: { S: "TechVision Solutions Ltd" },
+        claimPeriod: { S: "2024-Q1" },
+        amount: { N: "125000" },
+        associatedProject: { S: "AI-Powered Customer Analytics Platform" },
+        status: { S: "Approved" },
       },
     ];
 
@@ -55,11 +55,11 @@ describe("Claims API", () => {
 
   it("creates a claim", async () => {
     const payload = {
-      companyName: "Test Co",
-      claimPeriod: "2024-12",
-      amount: 1000,
-      associatedProject: "Project Alpha",
-      status: "DRAFT",
+      companyName: "Smart City Technologies",
+      claimPeriod: "2024-Q4",
+      amount: 275000,
+      associatedProject: "IoT Smart City Infrastructure",
+      status: "Draft",
     };
 
     const createdItem = {
@@ -86,45 +86,45 @@ describe("Claims API", () => {
   it("retrieves a claim by id", async () => {
     const mockItem = {
       Item: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        companyName: { S: "Test Company" },
-        claimPeriod: { S: "2024-01" },
-        amount: { N: "1000" },
-        associatedProject: { S: "Project Alpha" },
-        status: { S: "DRAFT" },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
+        companyName: { S: "TechVision Solutions Ltd" },
+        claimPeriod: { S: "2024-Q1" },
+        amount: { N: "125000" },
+        associatedProject: { S: "AI-Powered Customer Analytics Platform" },
+        status: { S: "Approved" },
       },
     } as any;
 
     mockSend.mockResolvedValueOnce(mockItem);
 
     const response = await request(app).get(
-      "/api/claims/1?dateCreated=2024-01-01T00:00:00.000Z"
+      "/api/claims/01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f?dateCreated=2024-04-15T10:30:00.000Z"
     );
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("Item");
-    expect(response.body.Item.id.S).toBe("1");
+    expect(response.body.Item.id.S).toBe("01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f");
   });
 
   it("updates a claim", async () => {
     const updatedAttributes = {
       Attributes: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        status: { S: "APPROVED" },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
+        status: { S: "Approved" },
       },
     } as any;
 
     mockSend.mockResolvedValueOnce(updatedAttributes);
 
     const response = await request(app)
-      .patch("/api/claims/1?dateCreated=2024-01-01T00:00:00.000Z")
-      .send({ status: "APPROVED" });
+      .patch("/api/claims/01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f?dateCreated=2024-04-15T10:30:00.000Z")
+      .send({ status: "Approved" });
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("Attributes");
-    expect(response.body.Attributes.status.S).toBe("APPROVED");
+    expect(response.body.Attributes.status.S).toBe("Approved");
   });
 
   it("deletes a claim", async () => {
@@ -132,13 +132,13 @@ describe("Claims API", () => {
     mockSend.mockResolvedValueOnce({} as any).mockResolvedValueOnce(null as any);
 
     const deleteResponse = await request(app).delete(
-      "/api/claims/1?dateCreated=2024-01-01T00:00:00.000Z"
+      "/api/claims/01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f?dateCreated=2024-04-15T10:30:00.000Z"
     );
 
     expect(deleteResponse.status).toBe(204);
 
     const getResponse = await request(app).get(
-      "/api/claims/1?dateCreated=2024-01-01T00:00:00.000Z"
+      "/api/claims/01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f?dateCreated=2024-04-15T10:30:00.000Z"
     );
     expect(getResponse.status).toBe(404);
   });

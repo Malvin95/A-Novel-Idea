@@ -23,13 +23,13 @@ describe("claims.service", () => {
   it("returns all claims", async () => {
     const mockItems = [
       {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        companyName: { S: "Test Company" },
-        claimPeriod: { S: "2024-01" },
-        amount: { N: "1000" },
-        associatedProject: { S: "Project Alpha" },
-        status: { S: status.DRAFT },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
+        companyName: { S: "TechVision Solutions Ltd" },
+        claimPeriod: { S: "2024-Q1" },
+        amount: { N: "125000" },
+        associatedProject: { S: "AI-Powered Customer Analytics Platform" },
+        status: { S: status.APPROVED },
       },
     ];
 
@@ -55,27 +55,27 @@ describe("claims.service", () => {
   it("returns a claim by id and dateCreated", async () => {
     const mockItem = {
       Item: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
-        companyName: { S: "Test Company" },
-        claimPeriod: { S: "2024-01" },
-        amount: { N: "1000" },
-        associatedProject: { S: "Project Alpha" },
-        status: { S: status.DRAFT },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
+        companyName: { S: "TechVision Solutions Ltd" },
+        claimPeriod: { S: "2024-Q1" },
+        amount: { N: "125000" },
+        associatedProject: { S: "AI-Powered Customer Analytics Platform" },
+        status: { S: status.APPROVED },
       },
     };
 
     mockSend.mockResolvedValueOnce(mockItem as any);
 
-    const result = await getClaim("1", "2024-01-01T00:00:00.000Z");
+    const result = await getClaim("01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f", "2024-04-15T10:30:00.000Z");
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-claims-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+            dateCreated: { S: "2024-04-15T10:30:00.000Z" },
           },
         }),
       })
@@ -85,10 +85,10 @@ describe("claims.service", () => {
 
   it("creates a claim", async () => {
     const payload: Claim = {
-      companyName: "Claim Co",
-      claimPeriod: "2024-11",
-      amount: 5000,
-      associatedProject: "Project Beta",
+      companyName: "Smart City Technologies",
+      claimPeriod: "2024-Q4",
+      amount: 275000,
+      associatedProject: "IoT Smart City Infrastructure",
       status: status.DRAFT,
     };
 
@@ -101,10 +101,10 @@ describe("claims.service", () => {
         input: expect.objectContaining({
           TableName: "a-novel-claims-table-v2",
           Item: expect.objectContaining({
-            companyName: { S: "Claim Co" },
-            claimPeriod: { S: "2024-11" },
-            amount: { N: "5000" },
-            associatedProject: { S: "Project Beta" },
+            companyName: { S: "Smart City Technologies" },
+            claimPeriod: { S: "2024-Q4" },
+            amount: { N: "275000" },
+            associatedProject: { S: "IoT Smart City Infrastructure" },
             status: { S: status.DRAFT },
           }),
         }),
@@ -118,21 +118,21 @@ describe("claims.service", () => {
 
     mockSend.mockResolvedValueOnce({
       Attributes: {
-        id: { S: "1" },
-        dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+        id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+        dateCreated: { S: "2024-04-15T10:30:00.000Z" },
         status: { S: status.APPROVED },
       },
     } as unknown);
 
-    const result = await updateClaim("1", "2024-01-01T00:00:00.000Z", testClaim);
+    const result = await updateClaim("01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f", "2024-04-15T10:30:00.000Z", testClaim);
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-claims-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+            dateCreated: { S: "2024-04-15T10:30:00.000Z" },
           },
           UpdateExpression: expect.stringContaining("#status = :status"),
         }),
@@ -144,15 +144,15 @@ describe("claims.service", () => {
   it("deletes a claim", async () => {
     mockSend.mockResolvedValueOnce({} as any);
 
-    await deleteClaim("1", "2024-01-01T00:00:00.000Z");
+    await deleteClaim("01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f", "2024-04-15T10:30:00.000Z");
 
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
           TableName: "a-novel-claims-table-v2",
           Key: {
-            id: { S: "1" },
-            dateCreated: { S: "2024-01-01T00:00:00.000Z" },
+            id: { S: "01939c70-1a2b-7c3d-4e5f-1a2b3c4d5e6f" },
+            dateCreated: { S: "2024-04-15T10:30:00.000Z" },
           },
         }),
       })
