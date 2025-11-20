@@ -1,23 +1,33 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Skip middleware for NextAuth routes to avoid interfering with the OAuth callback
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
+  }
+
   // Define public routes that don't require authentication
-  const publicRoutes = ["/login", "/register", "/dashboard"]; //TODO: remove dashboard from public routes
+  const publicRoutes = ["/login", "/register"];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // Define protected routes that require authentication
-  // const protectedRoutes = ["/dashboard"];
-  const protectedRoutes = ["/dontWorry"];
+  const protectedRoutes = ["/dashboard"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
   // Get the authentication token from cookies. Support legacy `auth-token` plus NextAuth cookies.
   const authToken = request.cookies.get("auth-token")?.value;
-  const nextAuthCookie = request.cookies.get("next-auth.session-token")?.value || request.cookies.get("__Secure-next-auth.session-token")?.value;
+  
+  // NextAuth may chunk large session cookies, check for main cookie or any chunks
+  const nextAuthCookie = request.cookies.get("next-auth.session-token")?.value 
+    || request.cookies.get("__Secure-next-auth.session-token")?.value
+    || request.cookies.get("next-auth.session-token.0")?.value
+    || request.cookies.get("__Secure-next-auth.session-token.0")?.value;
+  
   const isAuthenticated = !!(authToken || nextAuthCookie);
 
   // If user is not authenticated and trying to access a protected route
@@ -36,17 +46,17 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Configure which routes the proxy should run on
+// Configure which routes the middleware should run on
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * Note: We explicitly handle /api/auth exclusion in the middleware function
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
 

@@ -1,13 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (status === "authenticated") {
+      console.log("✅ Session authenticated, redirecting to dashboard...", session);
+      router.push("/dashboard");
+    } else if (status === "unauthenticated") {
+      console.log("❌ No session found");
+    } else {
+      console.log("⏳ Session status:", status);
+    }
+  }, [status, router, session]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,10 +70,14 @@ export default function LoginPage() {
         <div className="space-y-4">
           <button
             type="button"
-            onClick={() => signIn("cognito", { callbackUrl: "/dashboard" })}
-            className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => {
+              // For OAuth providers, signIn with redirect=true (default) will handle the full flow
+              signIn("cognito", { callbackUrl: "/dashboard" });
+            }}
+            disabled={loading || status === "loading"}
+            className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
           >
-            Sign in with Cognito
+            {loading || status === "loading" ? "Signing in..." : "Sign in with Cognito"}
           </button>
         </div>
 
