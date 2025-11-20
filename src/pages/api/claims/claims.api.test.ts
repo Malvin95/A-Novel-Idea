@@ -19,8 +19,16 @@ const app = createApiTestApp([
 ]);
 
 describe("Claims API", () => {
+  const originalEnv = process.env;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Disable mocks to test actual handler logic
+    process.env = { ...originalEnv, USE_MOCKS: "false" };
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
   });
 
   it("lists claims", async () => {
