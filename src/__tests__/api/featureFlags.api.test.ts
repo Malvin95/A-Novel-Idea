@@ -2,9 +2,9 @@ import request from "supertest";
 import projectsHandler from "@/pages/api/projects/index";
 import claimsHandler from "@/pages/api/claims/index";
 import { createApiTestApp } from "./testServer";
-import { ddbDocClient } from "@/pages/api/lib/dynamo";
+import { ddbDocClient } from "@/lib/dynamo";
 
-jest.mock("@/pages/api/lib/dynamo", () => ({
+jest.mock("@/lib/dynamo", () => ({
   ddbDocClient: { send: jest.fn() },
 }));
 

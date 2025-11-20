@@ -2,7 +2,7 @@
 
 - **Base URL (dev)**: `http://localhost:3000/api`
 - The API layer is implemented with Next.js API routes in `src/pages/api`.
-- Data is served from in-memory mock collections defined in `src/pages/services/stubData.ts`; no external database is used.
+- Data is served from in-memory mock collections defined in `src/services/stubData.ts`; no external database is used.
 - Requests and responses are JSON.
 
 ---
@@ -74,7 +74,7 @@ Content-Type: application/json
 
 ## Service Layer
 
-Located under `src/pages/services/`.
+Located under `src/services/`.
 
 | File | Responsibility | Notes |
 | --- | --- | --- |

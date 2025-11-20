@@ -1,13 +1,19 @@
-import { Project } from "@/shared/interfaces";
-import { ddbDocClient } from "@/pages/api/lib/dynamo";
+import { Claim } from "@/shared/interfaces";
+import { ddbDocClient } from "@/lib/dynamo";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { v7 as uuidv7} from "uuid";
 import { DeleteItemCommand, GetItemCommand, PutItemCommand, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { EAVtype } from "../claims/claims.service";
-import { v7 as uuidv7 } from "uuid";
 
-const TABLE_NAME = "a-novel-project-table-v2";
+const TABLE_NAME = "a-novel-claims-table-v2";
 
-export async function getProjects() {
+export type EAVtype= {
+    ':claimPeriod'?: { S: string },
+    ':amount'?: { N: string },
+    ':associatedProject'?: { S: string },
+    ':status'?: { S: string }
+}
+
+export async function getClaims() {
     const res = await ddbDocClient.send(
         new ScanCommand({
             TableName: TABLE_NAME,
@@ -16,12 +22,12 @@ export async function getProjects() {
     return res;
 }
 
-export async function getProject(projectId: string, dateCreated: string) {
+export async function getClaim(claimId: string, dateCreated: string) {
     const res = await ddbDocClient.send(
         new GetItemCommand({
             TableName: TABLE_NAME,
             Key: { 
-                id: { S: projectId },
+                id: { S: claimId },
                 dateCreated: { S: dateCreated }
             }
         })
@@ -29,44 +35,46 @@ export async function getProject(projectId: string, dateCreated: string) {
     return res;
 }
 
-export async function createProject(data: Project) {
+export async function createClaim(data: Claim) {
     const res = await ddbDocClient.send(
         new PutItemCommand({
             TableName: TABLE_NAME,
             Item: {
                 id: { S: uuidv7() },
                 dateCreated: { S: new Date().toISOString() },
-                projectName: { S: data.projectName }
+                companyName: { S: data.companyName },
+                claimPeriod: { S: data.claimPeriod },
+                amount: { N: data.amount.toString() },
+                associatedProject: { S: data.associatedProject },
+                status: { S: data.status }
             }
         })
-    )
+    ); 
 
     return res;
 }
 
-export async function updateProject(projectId: string, dateCreated: string, data: Project) {
+export async function updateClaim(claimId: string, dateCreated: string, data: Partial<Claim>) {
     const setFragments: string[] = []; // Used for the Update Expression, holds the dynamically determined columns that would be updated.
     const expressionAttributeValues: EAVtype = {}; // Used for the fields that have been filled in that the user wishes to update.
     const expressionAttributeNames: Record<string, string> = {}; // The names of the column/ fields that the user would be updating.
 
     // A data cleaner that modifies both the expressionAttributeValues Obj and the expressionAttributeNames 
     // so that they are formatted and ready for use when querying the dynamoDB
-    // NOTE: Key attributes (id, dateCreated) cannot be updated - they must be excluded
-    const addSetter = (field: keyof Project, value: Project[keyof Project]) => {
+    const addSetter = (field: keyof Claim, value: Claim[keyof Claim]) => {
         if (value === undefined) return;
-        // Skip key attributes - they cannot be updated in DynamoDB
-        if (field === "id" || field === "dateCreated") return;
         const nameKey = `#${field}`;
         const valueKey = `:${field}`;
         expressionAttributeNames[nameKey] = field;
-        expressionAttributeValues[valueKey] = typeof value === "number" 
-            ? { N: value.toString() } 
-            : { S: value };
+        (expressionAttributeValues as any)[valueKey] = typeof value === "number" ? { N: value.toString() } : { S: value };
         setFragments.push(`${nameKey} = ${valueKey}`);
     };
 
-    // Add updatable fields (excluding key attributes)
-    addSetter("projectName", data.projectName);
+    addSetter("companyName", data.companyName);
+    addSetter("claimPeriod", data.claimPeriod);
+    addSetter("amount", data.amount);
+    addSetter("associatedProject", data.associatedProject);
+    addSetter("status", data.status);
 
     if (!setFragments.length) {
         throw new Error("No updatable fields were provided");
@@ -76,7 +84,7 @@ export async function updateProject(projectId: string, dateCreated: string, data
         new UpdateItemCommand({
             TableName: TABLE_NAME,
             Key: { 
-                id: { S: projectId },
+                id: { S: claimId },
                 dateCreated: { S: dateCreated }
             },
             UpdateExpression: `SET ${setFragments.join(", ")}`,
@@ -87,16 +95,15 @@ export async function updateProject(projectId: string, dateCreated: string, data
     return res;
 }
 
-export async function deleteProject(projectId: string, dateCreated: string) {
+export async function deleteClaim(claimId: string, dateCreated: string) {
     const res = await ddbDocClient.send(
         new DeleteItemCommand({
             TableName: TABLE_NAME,
             Key: { 
-                id: {S: projectId},
+                id: {S: claimId},
                 dateCreated: { S: dateCreated }
             }
         })
     );
     return res;
 }
-  

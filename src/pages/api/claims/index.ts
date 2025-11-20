@@ -1,4 +1,4 @@
-import { createClaim, getClaims } from "@/pages/services/claims/claims.service";
+import { createClaim, getClaims } from "@/services/claims/claims.service";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withMock } from "@/lib/api/withMock";
 

@@ -1,4 +1,4 @@
-import { deleteProject, getProject, updateProject } from "@/pages/services/projects/projects.services";
+import { deleteProject, getProject, updateProject } from "@/services/projects/projects.services";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withMock } from "@/lib/api/withMock";
 
