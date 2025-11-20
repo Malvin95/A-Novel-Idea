@@ -84,7 +84,7 @@ export default function ProjectsPanel({ onRefreshNeeded }: ProjectsPanelProps) {
             key={idx}
             item={it}
             type="project"
-            onEdit={() => console.log("Edit project:", it.id)}
+            onEdit={() => fetchProjects()}
             onDelete={() => handleDeleteProject(it.id, it.dateCreated)}
           />
         ))}
