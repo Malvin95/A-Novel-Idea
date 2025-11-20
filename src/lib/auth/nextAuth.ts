@@ -13,62 +13,75 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false, // Set to false for localhost
+      },
+    },
+  },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      console.log("✅ SignIn callback - User authenticated:", user?.email);
+      // Allow sign in
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      console.log("🔀 Redirect callback - url:", url, "baseUrl:", baseUrl);
+      // If url is relative, prepend baseUrl
+      if (url.startsWith("/")) {
+        const redirectUrl = `${baseUrl}${url}`;
+        console.log("  → Redirecting to:", redirectUrl);
+        return redirectUrl;
+      }
+      // Allow callback to same origin
+      if (new URL(url).origin === baseUrl) {
+        console.log("  → Redirecting to:", url);
+        return url;
+      }
+      // Default to dashboard
+      const defaultUrl = `${baseUrl}/dashboard`;
+      console.log("  → Redirecting to default:", defaultUrl);
+      return defaultUrl;
+    },
     async jwt({ token, account, user }) {
       // Initial sign in
       if (account) {
-        token.accessToken = account.access_token;
-        token.idToken = account.id_token;
-        token.refreshToken = account.refresh_token;
+        console.log("🎫 JWT callback - Creating token for user:", user?.email);
+        console.log("   Account provider:", account.provider);
+        console.log("   Has access_token:", !!account.access_token);
+        // Only store essential info to keep cookie size small
+        token.sub = user?.id;
+        token.email = user?.email;
+        // Don't store full tokens in cookie to reduce size
+        // token.accessToken = account.access_token;
+        // token.idToken = account.id_token;
+        // token.refreshToken = account.refresh_token;
         token.expiresAt = Date.now() + Number(account.expires_in ?? 0) * 1000;
-      }
-
-      // Optionally refresh token if expired (simple implementation)
-      if (token.expiresAt && Date.now() > (token.expiresAt as number) - 30_000) {
-        try {
-          const url = `${process.env.COGNITO_ISSUER}/oauth2/token`;
-          const body = new URLSearchParams({
-            grant_type: "refresh_token",
-            client_id: process.env.COGNITO_CLIENT_ID || "",
-            refresh_token: token.refreshToken as string,
-          });
-
-          const headers: Record<string, string> = {
-            "Content-Type": "application/x-www-form-urlencoded",
-          };
-
-          // If client secret is present, include Basic auth
-          if (process.env.COGNITO_CLIENT_SECRET) {
-            headers["Authorization"] = `Basic ${Buffer.from(
-              `${process.env.COGNITO_CLIENT_ID}:${process.env.COGNITO_CLIENT_SECRET}`
-            ).toString("base64")}`;
-          }
-
-          const resp = await fetch(url, { method: "POST", headers, body: body.toString() });
-          const refreshed = await resp.json();
-
-          if (resp.ok) {
-            token.accessToken = refreshed.access_token;
-            token.idToken = refreshed.id_token ?? token.idToken;
-            token.expiresAt = Date.now() + (refreshed.expires_in ?? 3600) * 1000;
-            if (refreshed.refresh_token) token.refreshToken = refreshed.refresh_token;
-          } else {
-            token.error = "RefreshAccessTokenError";
-          }
-        } catch (e) {
-          token.error = "RefreshAccessTokenError";
-        }
+      } else {
+        console.log("🎫 JWT callback - Existing token for:", token.email);
       }
 
       return token;
     },
     async session({ session, token }) {
-      // Expose token values on the session object
-      (session as any).accessToken = token.accessToken;
-      (session as any).idToken = token.idToken;
-      (session as any).error = token.error;
+      console.log("📋 Session callback - Creating session for:", token.email);
+      // Add user info to session
+      if (session.user) {
+        session.user.id = token.sub as string;
+      }
       return session;
     },
   },
