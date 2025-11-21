@@ -93,11 +93,32 @@ export const authOptions: NextAuthOptions = {
       if (account) {
         if (useMockAuth) {
           console.log("🧪 Mock JWT - Creating token for user:", user?.email);
+          // In mock mode, assign admin role for testing
+          token.roles = ["admin"];
         } else {
           console.log("🎫 JWT callback - Creating token for user:", user?.email);
           console.log("   Account provider:", account.provider);
           console.log("   Has access_token:", !!account.access_token);
+          
+          // Extract Cognito groups from the ID token
+          const idToken = account.id_token;
+          if (idToken) {
+            try {
+              // Decode the JWT to extract groups (base64 decode the payload)
+              const payload = JSON.parse(
+                Buffer.from(idToken.split('.')[1], 'base64').toString()
+              );
+              token.roles = payload['cognito:groups'] || [];
+              console.log("   Cognito groups:", token.roles);
+            } catch (error) {
+              console.error("   Error decoding ID token:", error);
+              token.roles = [];
+            }
+          } else {
+            token.roles = [];
+          }
         }
+        
         // Only store essential info to keep cookie size small
         token.sub = user?.id;
         token.email = user?.email;
@@ -115,9 +136,10 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       console.log("📋 Session callback - Creating session for:", token.email);
-      // Add user info to session
+      // Add user info and roles to session
       if (session.user) {
         (session.user as any).id = token.sub as string;
+        (session.user as any).roles = token.roles || [];
       }
       return session;
     },
