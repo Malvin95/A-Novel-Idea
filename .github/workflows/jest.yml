@@ -2,9 +2,9 @@ name: Jest
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, preview-staging ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, preview-staging ]
 
 jobs:
   test:
