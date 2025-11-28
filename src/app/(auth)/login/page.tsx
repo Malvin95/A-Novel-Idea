@@ -112,14 +112,6 @@ export default function LoginPage() {
           </P>
         </div>
 
-        {!useMockAuth && (
-          <div className="space-y-4">
-            <Button type="button" onClick={() => signIn("cognito", { callbackUrl: "/dashboard" })} className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              Sign in with Cognito
-            </Button>
-          </div>
-        )}
-
         <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -157,14 +149,21 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </div>
-
-          <div className="text-center text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">Do not have an account? </span>
-            <a href="/register" className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-zinc-50 dark:hover:text-zinc-300">
-              Sign up
-            </a>
-          </div>
         </form>
+
+        {!useMockAuth && (
+          <div className="space-y-4">
+            <Button type="button" onClick={() => signIn("cognito", { callbackUrl: "/dashboard" })} className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              Sign in with Cognito
+            </Button>
+          </div>
+        )}
+        <div className="text-center text-sm">
+          <span className="text-zinc-600 dark:text-zinc-400">Do not have an account? </span>
+          <a href="/register" className="font-medium text-zinc-900 hover:text-zinc-700 dark:text-zinc-50 dark:hover:text-zinc-300">
+            Sign up
+          </a>
+        </div>
       </div>
     </div>
   );
