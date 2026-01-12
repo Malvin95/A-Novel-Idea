@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Fun Fact
+
+This project has been deployed and [you can view it here](https://anovelidea.vercel.app/).
+
+Logging in currently works via Cognito (other methods will soon be implemented!). *Please reach out to me Directly to get the login details!!*
 
 ## Getting Started
 
@@ -84,3 +88,4 @@ The risks I did spot could be a further issue with removing my hands from the wh
 ## Improvements
 With more time, I would have hoped to have implemented a lot more concerning the authentication so that it's not just Cognito doing a lot of the heavy lifting, but instead NextAuth that would also be able to handle the logging in easily, this would allow the UI to be consistent and clean. I would also like to have cleaned up the UI so that the UI is a bit more effectively readable and human-friendly. 
 
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
